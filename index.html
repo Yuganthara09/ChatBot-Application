@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatBot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+        .chat-container {
+            width: 50%;
+            max-width: 600px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .messages {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .message {
+            margin: 5px 0;
+        }
+        .bot {
+            color: #444;
+        }
+        .user {
+            color: #007bff;
+            text-align: right;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="messages" id="messages"></div>
+        <input type="text" id="userInput" placeholder="Type a message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const userInput = document.getElementById("userInput").value;
+            if (!userInput.trim()) return;
+
+            const messages = document.getElementById("messages");
+
+            // Dynamically adding user message
+            messages.innerHTML += `<div class="message user">${userInput}</div>`;
+
+            fetch("/get_response", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userInput }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botResponse = data.response;
+                
+                // Dynamically adding bot response
+                messages.innerHTML += `<div class="message bot">${botResponse}</div>`;
+                
+                // Scroll to the bottom
+                messages.scrollTop = messages.scrollHeight;
+            })
+            .catch(error => {
+                // Handle error
+                messages.innerHTML += `<div class="message bot">Error: ${error.message}</div>`;
+            });
+
+            // Clear the input field
+            document.getElementById("userInput").value = "";
+        }
+    </script>
+</body>
+</html>
